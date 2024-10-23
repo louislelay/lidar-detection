@@ -7,7 +7,7 @@
 
 using std::placeholders::_1;
 
-class PointCloudSegmentation : public rclpp::Node
+class PointCloudSegmentation : public rclcpp::Node
 {
   public:
     PointCloudSegmentation() : Node("pointcloud_segmentation")
@@ -22,6 +22,12 @@ class PointCloudSegmentation : public rclpp::Node
       publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
         "output_pcl", 
         10);
+      
+      // Initialize the GroundRemoval class with a threshold for plane segmentation
+      ground_removal_ = std::make_shared<GroundRemoval>(0.01);
+
+      // Initialize the ClusterExtraction class
+      cluster_extraction_ = std::make_shared<ClusterExtraction>(0.2, 5, 200);
     }
 
   private:
@@ -46,6 +52,8 @@ class PointCloudSegmentation : public rclpp::Node
         // Perform cluster extraction
         auto clusters = cluster_extraction_->extractClusters(cloud_filtered);
 
+        RCLCPP_INFO(this->get_logger(), "Extracted %lu clusters", clusters.size());
+
         // Process and publish each cluster (optional)
         for (const auto &cluster : clusters)
         {
@@ -53,8 +61,12 @@ class PointCloudSegmentation : public rclpp::Node
           pcl::toROSMsg(*cluster, cluster_msg);
           cluster_msg.header = msg->header; // Set the same header as input
 
+          // Log the cluster information
+          RCLCPP_INFO(this->get_logger(), "Sent PointCloud2 with %d data points", cluster_msg.width * cluster_msg.height);
+
           // Publish each cluster (you might want to create separate topics for clusters)
           publisher_->publish(cluster_msg);
+          
         }
       }
       catch (const std::runtime_error &e)
@@ -68,7 +80,7 @@ class PointCloudSegmentation : public rclpp::Node
     PointCloudFilter filter;  // Filter class object
     std::shared_ptr<GroundRemoval> ground_removal_; // Ground removal class object
     std::shared_ptr<ClusterExtraction> cluster_extraction_; // ClusterExtraction instance
-}
+};
 
 int main(int argc, char **argv)
 {
