@@ -6,7 +6,7 @@
 using std::placeholders::_1;
 
 
-class PointCloudPreProcessor : public rclpp::Node
+class PointCloudPreProcessor : public rclcpp::Node
 {
   public:
     PointCloudPreProcessor() : Node("pointcloud_preprocessor")
@@ -40,7 +40,7 @@ class PointCloudPreProcessor : public rclpp::Node
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
     PointCloudFilter filter;  // Filter class object
-}
+};
 
 int main(int argc, char **argv)
 {

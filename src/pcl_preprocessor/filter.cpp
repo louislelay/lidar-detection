@@ -1,13 +1,12 @@
 #include "filter.hpp"
-
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
 
 // Constructor
 PointCloudFilter::PointCloudFilter() {}
 
-// Preprocess point cloud (e.g., using a VoxelGrid filter for downsampling)
-void PointCloudFilter::preprocessPointCloud(const sensor_msgs::PointCloud2::ConstPtr& input_cloud, sensor_msgs::PointCloud2& output_cloud) {
+// Preprocess point cloud
+void PointCloudFilter::preprocessPointCloud(const sensor_msgs::msg::PointCloud2::SharedPtr input_cloud, sensor_msgs::msg::PointCloud2& output_cloud) {
     // Convert ROS PointCloud2 message to PCL data type
     pcl::PCLPointCloud2::Ptr pcl_cloud(new pcl::PCLPointCloud2());
     pcl_conversions::toPCL(*input_cloud, *pcl_cloud);
