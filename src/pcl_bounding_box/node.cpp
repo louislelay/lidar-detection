@@ -4,31 +4,44 @@
 #include "cluster_extraction.hpp"
 #include "bounding_box.hpp"
 
+#include "bounding_box.hpp"
+#include "../pcl_cluster_extraction/cluster_extraction.hpp"
+#include "../pcl_ground_removal/ground_removal.hpp"
+#include "../pcl_preprocessor/filter.hpp"
 
+using std::placeholders::_1;
 
-
-
-
-// deux trois trucs manquant pr filter à ajouter et l'init des classes je me suis rendu compte je l'avais pas fait ds les autres nodes dc c'est a faire ausssi + ne pas oublier de les rendre executable ds cmakelists et package.xml
-
-
-
-
-
-class PointCloudProcessor : public rclcpp::Node
+class PointCloudBoundingBox : public rclcpp::Node
 {
 public:
-    PointCloudProcessor()
-        : Node("point_cloud_processor"),
-          ground_removal_(std::make_shared<GroundRemoval>()),  // Assume GroundRemoval is defined elsewhere
-          cluster_extraction_(std::make_shared<ClusterExtraction>()),
-          bounding_box_(std::make_shared<BoundingBox>())
+    PointCloudBoundingBox() : Node("pointcloud_bounding_box")
     {
-        publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("filtered_pointcloud", 10);
-        marker_publisher_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("bounding_boxes", 10);
-        subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-            "input_pointcloud", 10, std::bind(&PointCloudProcessor::pointcloud_callback, this, std::placeholders::_1));
+      // Create Subscriber to "input_pcl" topic
+      subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
+        "input_pcl",
+        10,
+        std::bind(&PointCloudBoundingBox::pointcloud_callback, this, _1));
+
+      // Create publisher to "output_pcl" topic
+      publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
+        "output_pcl", 
+        10);
+
+      // Create publisher to "bounding_boxes" topic
+      marker_publisher_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
+        "bounding_boxes", 
+        10);
+      
+      // Initialize the GroundRemoval class with a threshold for plane segmentation
+      ground_removal_ = std::make_shared<GroundRemoval>(0.01);
+
+      // Initialize the ClusterExtraction class
+      cluster_extraction_ = std::make_shared<ClusterExtraction>(0.2, 5, 200);
+
+      // Initialize the BoundingBox class
+      bounding_box_ = std::make_shared<BoundingBox>();
     }
+
 
 private:
     void pointcloud_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
@@ -72,7 +85,16 @@ private:
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
-    std::shared_ptr<GroundRemoval> ground_removal_;       // Assuming GroundRemoval is defined elsewhere
+    PointCloudFilter filter;                                // Filter class object
+    std::shared_ptr<GroundRemoval> ground_removal_;         // Assuming GroundRemoval is defined elsewhere
     std::shared_ptr<ClusterExtraction> cluster_extraction_; // ClusterExtraction instance
-    std::shared_ptr<BoundingBox> bounding_box_;           // BoundingBox instance
+    std::shared_ptr<BoundingBox> bounding_box_;             // BoundingBox instance
 };
+
+int main(int argc, char **argv)
+{
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<PointCloudBoundingBox>());
+    rclcpp::shutdown();
+    return 0;
+}
