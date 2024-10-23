@@ -4,7 +4,7 @@
 using std::placeholders::_1;
 
 
-class PointCloudProcessor : public rclpp::Node
+class PointCloudProcessor : public rclcpp::Node
 {
   public:
     PointCloudProcessor() : Node("pointcloud_processor")
@@ -37,7 +37,7 @@ class PointCloudProcessor : public rclpp::Node
 
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
-}
+};
 
 int main(int argc, char **argv)
 {
