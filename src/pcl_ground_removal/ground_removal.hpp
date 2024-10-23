@@ -11,13 +11,13 @@ class GroundRemoval
 {
     public:
         // Constructor
-        GroundRemoval(double distance_threshold = 0.01)
+        GroundRemoval(double distance_threshold = 0.01);
 
         // Function to remove ground
-        pcl::PointCloud<pcl::PointXYZ>::Ptr removeGround(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
+        pcl::PointCloud<pcl::PointXYZ>::Ptr removeGround(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
     
     private:
         pcl::SACSegmentation<pcl::PointXYZ> seg_;
-}
+};
 
 #endif // GROUND_REMOVAL_HPP

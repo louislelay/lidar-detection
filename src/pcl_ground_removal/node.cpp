@@ -6,7 +6,7 @@
 
 using std::placeholders::_1;
 
-class PointCloudGroundRemoval : public rclpp::Node
+class PointCloudGroundRemoval : public rclcpp::Node
 {
   public:
     PointCloudGroundRemoval() : Node("pointcloud_ground_removal")
@@ -21,6 +21,9 @@ class PointCloudGroundRemoval : public rclpp::Node
       publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
         "output_pcl", 
         10);
+
+      // Initialize the GroundRemoval class with a threshold for plane segmentation
+      ground_removal_ = std::make_shared<GroundRemoval>(0.01);
     }
 
   private:
@@ -60,7 +63,7 @@ class PointCloudGroundRemoval : public rclpp::Node
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
     PointCloudFilter filter;  // Filter class object
     std::shared_ptr<GroundRemoval> ground_removal_; // Ground removal class object
-}
+};
 
 int main(int argc, char **argv)
 {

@@ -1,6 +1,6 @@
 #include "ground_removal.hpp"
 
-GroundRemoval::GroundRemoval(double distance_threshold = 0.01)
+GroundRemoval::GroundRemoval(double distance_threshold)
 {
     seg_.setOptimizeCoefficients(true);
     seg_.setModelType(pcl::SACMODEL_PLANE);
